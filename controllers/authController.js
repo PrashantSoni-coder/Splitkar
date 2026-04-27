@@ -1,6 +1,6 @@
-const User = require('../models/User');
-const Group = require('../models/Group');
-const Expense = require('../models/Expense');
+const User     = require('../models/User');
+const Group    = require('../models/Group');
+const Expense  = require('../models/Expense');
 const { validationResult } = require('express-validator');
 const sendEmail = require('../utils/sendEmail');
 
@@ -24,11 +24,7 @@ exports.postRegister = async (req, res, next) => {
     }
     const user = await User.create({ name, email, password });
     req.session.user = { _id: user._id, name: user.name, email: user.email };
-    await sendEmail({
-      to: user.email,
-      subject: 'Welcome to SplitKar!',
-      html: `<h2>Hi ${user.name},</h2><p>Welcome to SplitKar! Start splitting expenses with your friends and groups.</p>`
-    });
+    sendEmail.welcome(user).catch(() => {});
     req.flash('success', `Welcome, ${user.name}!`);
     res.redirect('/dashboard');
   } catch (err) { next(err); }
@@ -77,7 +73,6 @@ exports.getDashboard = async (req, res, next) => {
       .sort({ updatedAt: -1 })
       .limit(5);
 
-    // Total owed to user & total user owes
     const expenses = await Expense.find({
       group: { $in: groups.map(g => g._id) }
     }).populate('paidBy', '_id');
@@ -94,9 +89,8 @@ exports.getDashboard = async (req, res, next) => {
     });
 
     res.render('dashboard/index', {
-      title: 'Dashboard',
-      groups,
-      totalOwed: totalOwed.toFixed(2),
+      title: 'Dashboard', groups,
+      totalOwed:  totalOwed.toFixed(2),
       totalOwing: totalOwing.toFixed(2)
     });
   } catch (err) { next(err); }

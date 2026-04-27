@@ -3,8 +3,8 @@ const Expense  = require('../models/Expense');
 const Activity = require('../models/Activity');
 const User     = require('../models/User');
 const { validationResult } = require('express-validator');
+const sendEmail = require('../utils/sendEmail');
 
-// GET /groups
 exports.getGroups = async (req, res, next) => {
   try {
     const groups = await Group.find({ members: req.session.user._id })
@@ -14,12 +14,10 @@ exports.getGroups = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// GET /groups/new
 exports.getNewGroup = (req, res) => {
   res.render('groups/new', { title: 'Create Group' });
 };
 
-// POST /groups
 exports.postCreateGroup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -29,15 +27,14 @@ exports.postCreateGroup = async (req, res, next) => {
   try {
     const { name, description } = req.body;
     const group = await Group.create({
-      name,
-      description,
+      name, description,
       createdBy: req.session.user._id,
-      members: [req.session.user._id]
+      members:   [req.session.user._id]
     });
     await Activity.create({
-      user: req.session.user._id,
-      group: group._id,
-      type: 'created_group',
+      user:        req.session.user._id,
+      group:       group._id,
+      type:        'created_group',
       description: `${req.session.user.name} created the group "${group.name}"`
     });
     req.flash('success', `Group "${group.name}" created!`);
@@ -45,7 +42,6 @@ exports.postCreateGroup = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// GET /groups/:id
 exports.getGroup = async (req, res, next) => {
   try {
     const group = await Group.findById(req.params.id).populate('members', 'name email');
@@ -58,7 +54,6 @@ exports.getGroup = async (req, res, next) => {
       .populate('splits.user', 'name')
       .sort({ createdAt: -1 });
 
-    // Build balance summary for current user
     const userId = req.session.user._id.toString();
     let totalOwed = 0, totalOwing = 0;
     expenses.forEach(exp => {
@@ -75,7 +70,6 @@ exports.getGroup = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// POST /groups/:id/invite
 exports.inviteMember = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -92,18 +86,22 @@ exports.inviteMember = async (req, res, next) => {
 
     group.members.push(invitee._id);
     await group.save();
+
     await Activity.create({
-      user: invitee._id,
-      group: group._id,
-      type: 'joined_group',
+      user:        invitee._id,
+      group:       group._id,
+      type:        'joined_group',
       description: `${invitee.name} was added to "${group.name}" by ${req.session.user.name}`
     });
+
+    // Send invite email (non-blocking)
+    sendEmail.groupInvite(invitee, group, req.session.user.name).catch(() => {});
+
     req.flash('success', `${invitee.name} added to the group!`);
     res.redirect(`/groups/${group._id}`);
   } catch (err) { next(err); }
 };
 
-// DELETE /groups/:id  (creator only)
 exports.deleteGroup = async (req, res, next) => {
   try {
     const group = await Group.findById(req.params.id);

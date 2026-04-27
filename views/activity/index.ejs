@@ -1,0 +1,62 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Activity Feed</h1>
+  </div>
+
+  <!-- Group Filter -->
+  <div class="activity-filters">
+    <a href="/activity" class="filter-btn <%= !activeGroup ? 'active' : '' %>">All Groups</a>
+    <% userGroups.forEach(g => { %>
+      <a href="/activity?group=<%= g._id %>"
+         class="filter-btn <%= activeGroup && activeGroup._id.toString() === g._id.toString() ? 'active' : '' %>">
+        <%= g.name %>
+      </a>
+    <% }) %>
+  </div>
+
+  <% if (activities.length === 0) { %>
+    <div class="empty-state">
+      <p>No activity yet. Start by creating a group or adding an expense!</p>
+    </div>
+  <% } else { %>
+    <div class="activity-list">
+      <% activities.forEach(activity => { %>
+        <div class="activity-item">
+          <div class="activity-icon activity-icon--<%= activity.type %>">
+            <% if (activity.type === 'added_expense')    { %>💸<% } %>
+            <% if (activity.type === 'settled_expense')  { %>✅<% } %>
+            <% if (activity.type === 'created_group')    { %>🏠<% } %>
+            <% if (activity.type === 'joined_group')     { %>👋<% } %>
+            <% if (activity.type === 'deleted_expense')  { %>🗑️<% } %>
+          </div>
+          <div class="activity-content">
+            <p class="activity-desc"><%= activity.description %></p>
+            <p class="activity-meta">
+              <span class="activity-group"><%= activity.group.name %></span>
+              &bull;
+              <span class="activity-time">
+                <%= new Date(activity.createdAt).toLocaleDateString('en-IN', {
+                  day: 'numeric', month: 'short', year: 'numeric',
+                  hour: '2-digit', minute: '2-digit'
+                }) %>
+              </span>
+            </p>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% if (currentPage > 1) { %>
+          <a href="/activity?page=<%= currentPage - 1 %><%= groupId ? '&group=' + groupId : '' %>" class="btn btn-secondary">&larr; Prev</a>
+        <% } %>
+        <span class="page-info">Page <%= currentPage %> of <%= totalPages %></span>
+        <% if (currentPage < totalPages) { %>
+          <a href="/activity?page=<%= currentPage + 1 %><%= groupId ? '&group=' + groupId : '' %>" class="btn btn-secondary">Next &rarr;</a>
+        <% } %>
+      </div>
+    <% } %>
+  <% } %>
+</div>
