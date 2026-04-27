@@ -1,2 +1,50 @@
-<h1>Welcome to SplitKar</h1>
-<a href="/register">Get Started</a>
+<div class="landing-hero">
+  <div class="landing-badge">✦ Split smarter</div>
+  <h1 class="landing-title">Expenses divided.<br/>Friendships intact.</h1>
+  <p class="landing-subtitle">SplitKar makes it effortless to track shared expenses, split bills equally, and settle up with your group.</p>
+  <div class="landing-cta">
+    <a href="/register" class="btn btn-primary">Get Started Free</a>
+    <a href="/login"    class="btn btn-secondary">Log In</a>
+  </div>
+</div>
+
+<style>
+.landing-hero {
+  min-height:     calc(100vh - 160px);
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  justify-content: center;
+  text-align:     center;
+  padding:        24px;
+  gap:            20px;
+}
+.landing-badge {
+  display:       inline-block;
+  padding:       6px 16px;
+  border-radius: 20px;
+  background:    var(--accent-dim);
+  color:         var(--accent);
+  font-size:     13px;
+  font-weight:   600;
+  border:        1px solid rgba(0,229,176,0.3);
+  letter-spacing: 0.04em;
+}
+.landing-title {
+  font-size:     52px;
+  font-weight:   800;
+  line-height:   1.1;
+  max-width:     600px;
+  background:    linear-gradient(135deg, #e6edf3 0%, #00e5b0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.landing-subtitle {
+  max-width: 480px;
+  color:     var(--text-secondary);
+  font-size: 17px;
+  line-height: 1.7;
+}
+.landing-cta { display: flex; gap: 14px; margin-top: 8px; }
+</style>
