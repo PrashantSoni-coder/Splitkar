@@ -1,0 +1,33 @@
+<div class="expense-card">
+  <div class="expense-card-main">
+    <div class="expense-info">
+      <h3 class="expense-title"><%= expense.title %></h3>
+      <p class="expense-meta">Paid by <strong><%= expense.paidBy.name %></strong> &bull; <%=
+        new Date(expense.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+      %></p>
+      <% if (expense.notes) { %><p class="expense-notes"><%= expense.notes %></p><% } %>
+    </div>
+    <div class="expense-amount">₹<%= expense.amount.toFixed(2) %></div>
+  </div>
+  <div class="expense-splits">
+    <% expense.splits.forEach(split => { %>
+      <div class="split-row <%= split.settled ? "settled" : "unsettled" %>">
+        <span class="split-name"><%= split.user.name %></span>
+        <span class="split-amount">₹<%= split.amount.toFixed(2) %></span>
+        <% if (split.user._id.toString() === user._id.toString() && !split.settled && expense.paidBy._id.toString() !== user._id.toString()) { %>
+          <form action="/expenses/<%= expense._id %>/settle" method="POST" style="display:inline">
+            <button type="submit" class="btn btn-sm btn-success">Settle</button>
+          </form>
+        <% } else if (split.settled) { %>
+          <span class="badge badge-success">Settled</span>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+  <% if (expense.createdBy.toString() === user._id.toString()) { %>
+    <form action="/expenses/<%= expense._id %>?_method=DELETE" method="POST"
+      onsubmit="return confirm('Delete this expense?')" class="delete-expense-form">
+      <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+    </form>
+  <% } %>
+</div>
