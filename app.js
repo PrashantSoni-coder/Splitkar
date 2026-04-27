@@ -10,18 +10,22 @@ const flash          = require('connect-flash');
 const methodOverride = require('method-override');
 const expressLayouts = require('express-ejs-layouts');
 
-const connectDB       = require('./config/db');
-const authRoutes      = require('./routes/authRoutes');
-const groupRoutes     = require('./routes/groupRoutes');
-const expenseRoutes   = require('./routes/expenseRoutes');
-const activityRoutes  = require('./routes/activityRoutes');
-const errorHandler    = require('./middleware/errorHandler');
-const notFound        = require('./middleware/notFound');
+const connectDB         = require('./config/db');
+const authRoutes        = require('./routes/authRoutes');
+const groupRoutes       = require('./routes/groupRoutes');
+const expenseRoutes     = require('./routes/expenseRoutes');
+const activityRoutes    = require('./routes/activityRoutes');
+const healthRoutes      = require('./routes/healthRoutes');
+const errorHandler      = require('./middleware/errorHandler');
+const notFound          = require('./middleware/notFound');
 const { globalLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
 connectDB();
+
+// ── Trust Render's proxy (required for secure cookies + rate limiting) ──
+app.set('trust proxy', 1);
 
 // ── Security headers ──
 app.use(helmet({
@@ -40,6 +44,9 @@ app.use(helmet({
 
 // ── Performance ──
 app.use(compression());
+
+// ── Health check (before rate limiter so Render can always reach it) ──
+app.use(healthRoutes);
 
 // ── Global rate limit ──
 app.use(globalLimiter);
