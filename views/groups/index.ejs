@@ -1,0 +1,26 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>My Groups</h1>
+    <a href="/groups/new" class="btn btn-primary">+ New Group</a>
+  </div>
+
+  <% if (groups.length === 0) { %>
+    <div class="empty-state">
+      <p>You're not in any groups yet.</p>
+      <a href="/groups/new" class="btn btn-primary">Create your first group</a>
+    </div>
+  <% } else { %>
+    <div class="group-list">
+      <% groups.forEach(group => { %>
+        <a href="/groups/<%= group._id %>" class="group-card">
+          <div class="group-card-info">
+            <h3><%= group.name %></h3>
+            <% if (group.description) { %><p class="group-desc"><%= group.description %></p><% } %>
+            <p class="group-meta"><%= group.members.length %> member<%= group.members.length !== 1 ? "s" : "" %> &bull; Created by <%= group.createdBy.name %></p>
+          </div>
+          <span class="arrow">&rsaquo;</span>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
