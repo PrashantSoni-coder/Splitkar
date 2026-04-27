@@ -1,0 +1,14 @@
+<nav class="navbar">
+  <a class="navbar-brand" href="/">SplitKar</a>
+  <div class="navbar-links">
+    <% if (user) { %>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/groups">Groups</a>
+      <a href="/activity">Activity</a>
+      <a href="/logout">Logout</a>
+    <% } else { %>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    <% } %>
+  </div>
+</nav>
