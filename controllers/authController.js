@@ -1,15 +1,15 @@
 const User = require('../models/User');
+const Group = require('../models/Group');
+const Expense = require('../models/Expense');
 const { validationResult } = require('express-validator');
 const sendEmail = require('../utils/sendEmail');
 
-// GET /register
 exports.getRegister = (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
   res.render('auth/register', { title: 'Register' });
 };
 
-// POST /register
-exports.postRegister = async (req, res) => {
+exports.postRegister = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     req.flash('error', errors.array()[0].msg);
@@ -31,18 +31,14 @@ exports.postRegister = async (req, res) => {
     });
     req.flash('success', `Welcome, ${user.name}!`);
     res.redirect('/dashboard');
-  } catch (err) {
-    next(err);
-  }
+  } catch (err) { next(err); }
 };
 
-// GET /login
 exports.getLogin = (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
   res.render('auth/login', { title: 'Login' });
 };
 
-// POST /login
 exports.postLogin = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -62,12 +58,9 @@ exports.postLogin = async (req, res, next) => {
       req.flash('success', `Welcome back, ${user.name}!`);
       res.redirect('/dashboard');
     });
-  } catch (err) {
-    next(err);
-  }
+  } catch (err) { next(err); }
 };
 
-// GET /logout
 exports.logout = (req, res, next) => {
   req.session.destroy((err) => {
     if (err) return next(err);
@@ -76,7 +69,35 @@ exports.logout = (req, res, next) => {
   });
 };
 
-// GET /dashboard (placeholder until Phase 4)
-exports.getDashboard = (req, res) => {
-  res.render('dashboard/index', { title: 'Dashboard' });
+exports.getDashboard = async (req, res, next) => {
+  try {
+    const userId = req.session.user._id;
+    const groups = await Group.find({ members: userId })
+      .populate('createdBy', 'name')
+      .sort({ updatedAt: -1 })
+      .limit(5);
+
+    // Total owed to user & total user owes
+    const expenses = await Expense.find({
+      group: { $in: groups.map(g => g._id) }
+    }).populate('paidBy', '_id');
+
+    let totalOwed = 0, totalOwing = 0;
+    expenses.forEach(exp => {
+      exp.splits.forEach(split => {
+        if (split.settled) return;
+        if (exp.paidBy._id.toString() === userId.toString() && split.user.toString() !== userId.toString())
+          totalOwed += split.amount;
+        if (split.user.toString() === userId.toString() && exp.paidBy._id.toString() !== userId.toString())
+          totalOwing += split.amount;
+      });
+    });
+
+    res.render('dashboard/index', {
+      title: 'Dashboard',
+      groups,
+      totalOwed: totalOwed.toFixed(2),
+      totalOwing: totalOwing.toFixed(2)
+    });
+  } catch (err) { next(err); }
 };
