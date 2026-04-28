@@ -1,50 +1,459 @@
-<div class="landing-hero">
-  <div class="landing-badge">✦ Split smarter</div>
-  <h1 class="landing-title">Expenses divided.<br/>Friendships intact.</h1>
-  <p class="landing-subtitle">SplitKar makes it effortless to track shared expenses, split bills equally, and settle up with your group.</p>
-  <div class="landing-cta">
-    <a href="/register" class="btn btn-primary">Get Started Free</a>
-    <a href="/login"    class="btn btn-secondary">Log In</a>
-  </div>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SplitKar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #050a05;
+      --bg2:      #0a120a;
+      --accent:   #00e857;
+      --accent2:  #00c448;
+      --text:     #f0f7f0;
+      --muted:    #6b7f6b;
+      --border:   rgba(0,232,87,0.15);
+      --card:     rgba(0,232,87,0.05);
+    }
 
-<style>
-.landing-hero {
-  min-height:     calc(100vh - 160px);
-  display:        flex;
-  flex-direction: column;
-  align-items:    center;
-  justify-content: center;
-  text-align:     center;
-  padding:        24px;
-  gap:            20px;
-}
-.landing-badge {
-  display:       inline-block;
-  padding:       6px 16px;
-  border-radius: 20px;
-  background:    var(--accent-dim);
-  color:         var(--accent);
-  font-size:     13px;
-  font-weight:   600;
-  border:        1px solid rgba(0,229,176,0.3);
-  letter-spacing: 0.04em;
-}
-.landing-title {
-  font-size:     52px;
-  font-weight:   800;
-  line-height:   1.1;
-  max-width:     600px;
-  background:    linear-gradient(135deg, #e6edf3 0%, #00e5b0 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.landing-subtitle {
-  max-width: 480px;
-  color:     var(--text-secondary);
-  font-size: 17px;
-  line-height: 1.7;
-}
-.landing-cta { display: flex; gap: 14px; margin-top: 8px; }
-</style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background:  var(--bg);
+      color:       var(--text);
+      min-height:  100vh;
+      overflow-x:  hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content:  '';
+      position: fixed;
+      inset:    0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index:  0;
+      opacity:  0.4;
+    }
+
+    /* ── Glow blobs ── */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.18;
+    }
+    .blob-1 {
+      width:  600px; height: 600px;
+      background: var(--accent);
+      top: -200px; left: -150px;
+      animation: blobFloat 12s ease-in-out infinite;
+    }
+    .blob-2 {
+      width:  400px; height: 400px;
+      background: #00e857;
+      bottom: -100px; right: -100px;
+      animation: blobFloat 16s ease-in-out infinite reverse;
+    }
+    @keyframes blobFloat {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      33%  { transform: translate(30px, -40px) scale(1.05); }
+      66%  { transform: translate(-20px, 20px) scale(0.97); }
+    }
+
+    /* ── Navbar ── */
+    nav {
+      position: relative;
+      z-index:  10;
+      display:  flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      background: rgba(5,10,5,0.6);
+    }
+
+    .nav-brand {
+      display:     flex;
+      align-items: center;
+      gap:         10px;
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      font-size:   20px;
+      color:       var(--text);
+      text-decoration: none;
+    }
+
+    /*.nav-logo {*/
+    /*  width:           34px;*/
+    /*  height:          34px;*/
+    /*  background:      var(--accent);*/
+    /*  border-radius:   10px;*/
+    /*  display:         flex;*/
+    /*  align-items:     center;*/
+    /*  justify-content: center;*/
+    /*  font-size:       16px;*/
+    /*}*/
+
+    .nav-links {
+      display:     flex;
+      align-items: center;
+      gap:         8px;
+    }
+
+    .nav-links a {
+      color:           var(--muted);
+      text-decoration: none;
+      font-size:       14px;
+      font-weight:     500;
+      padding:         8px 18px;
+      border-radius:   8px;
+      transition:      all 0.2s ease;
+    }
+
+    .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+    .btn-nav {
+      background:    var(--accent) !important;
+      color:         #050a05 !important;
+      font-weight:   700 !important;
+      border-radius: 10px !important;
+      padding:       9px 22px !important;
+      transition:    all 0.2s ease !important;
+    }
+    .btn-nav:hover {
+      background:  var(--accent2) !important;
+      transform:   translateY(-1px);
+      box-shadow:  0 4px 20px rgba(0,232,87,0.35) !important;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      position:        relative;
+      z-index:         1;
+      display:         flex;
+      flex-direction:  column;
+      align-items:     center;
+      justify-content: center;
+      text-align:      center;
+      padding:         100px 24px 80px;
+      min-height:      calc(100vh - 74px);
+    }
+
+    .hero-badge {
+      display:       inline-flex;
+      align-items:   center;
+      gap:           8px;
+      padding:       8px 18px;
+      background:    rgba(0,232,87,0.08);
+      border:        1px solid rgba(0,232,87,0.25);
+      border-radius: 100px;
+      font-size:     13px;
+      font-weight:   600;
+      color:         var(--accent);
+      margin-bottom: 36px;
+      animation:     fadeUp 0.6s ease both;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-badge-dot {
+      width:         6px;
+      height:        6px;
+      background:    var(--accent);
+      border-radius: 50%;
+      animation:     pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%  { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    .hero-title {
+      font-family:  'Sora', sans-serif;
+      font-weight:  900;
+      font-size:    clamp(48px, 8vw, 88px);
+      line-height:  1.0;
+      margin-bottom: 28px;
+      animation:    fadeUp 0.6s 0.1s ease both;
+      letter-spacing: -2px;
+    }
+
+    .hero-title .line1 { color: var(--text); display: block; }
+    .hero-title .line2 {
+      display:             block;
+      color:               var(--accent);
+      text-shadow:         0 0 60px rgba(0,232,87,0.4);
+    }
+
+    .hero-sub {
+      max-width:     520px;
+      font-size:     18px;
+      line-height:   1.7;
+      color:         var(--muted);
+      margin-bottom: 44px;
+      animation:     fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-cta {
+      display:       flex;
+      gap:           14px;
+      margin-bottom: 56px;
+      animation:     fadeUp 0.6s 0.3s ease both;
+    }
+
+    .btn-primary {
+      display:       inline-flex;
+      align-items:   center;
+      gap:           8px;
+      padding:       14px 28px;
+      background:    var(--accent);
+      color:         #050a05;
+      font-family:   'DM Sans', sans-serif;
+      font-weight:   700;
+      font-size:     15px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition:    all 0.2s ease;
+      border:        none;
+      cursor:        pointer;
+    }
+
+    .btn-primary:hover {
+      background:  var(--accent2);
+      transform:   translateY(-2px);
+      box-shadow:  0 8px 30px rgba(0,232,87,0.4);
+    }
+
+    .btn-primary .arrow {
+      transition: transform 0.2s ease;
+    }
+
+    .btn-primary:hover .arrow { transform: translateX(4px); }
+
+    .btn-ghost {
+      display:         inline-flex;
+      align-items:     center;
+      padding:         14px 28px;
+      background:      rgba(255,255,255,0.05);
+      color:           var(--text);
+      font-family:     'DM Sans', sans-serif;
+      font-weight:     600;
+      font-size:       15px;
+      border-radius:   12px;
+      text-decoration: none;
+      border:          1px solid rgba(255,255,255,0.1);
+      transition:      all 0.2s ease;
+    }
+
+    .btn-ghost:hover {
+      background:  rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.2);
+      transform:   translateY(-2px);
+    }
+
+    .hero-trust {
+      display:     flex;
+      align-items: center;
+      gap:         28px;
+      animation:   fadeUp 0.6s 0.4s ease both;
+    }
+
+    .trust-item {
+      display:     flex;
+      align-items: center;
+      gap:         7px;
+      font-size:   13px;
+      color:       var(--muted);
+      font-weight: 500;
+    }
+
+    .trust-icon {
+      width:           18px;
+      height:          18px;
+      border-radius:   50%;
+      background:      rgba(0,232,87,0.15);
+      border:          1px solid rgba(0,232,87,0.3);
+      display:         flex;
+      align-items:     center;
+      justify-content: center;
+      font-size:       10px;
+    }
+
+    .trust-divider {
+      width:        1px;
+      height:       16px;
+      background:   var(--border);
+    }
+
+    /* ── Scroll indicator ──
+    .scroll-hint {
+      position:   absolute;
+      bottom:     32px;
+      left:       50%;
+      transform:  translateX(-50%);
+      display:    flex;
+      flex-direction: column;
+      align-items: center;
+      gap:         8px;
+      color:       var(--muted);
+      font-size:   12px;
+      animation:   fadeUp 1s 0.8s ease both;
+    }
+
+    .scroll-line {
+      width:       1px;
+      height:      40px;
+      background:  linear-gradient(to bottom, var(--accent), transparent);
+      animation:   scrollPulse 2s ease infinite;
+    } */
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Stats bar ──
+    .stats-bar {
+      position:   relative;
+      z-index:    1;
+      display:    flex;
+      justify-content: center;
+      gap:        0;
+      padding:    0 48px 80px;
+    }
+
+    .stat-card {
+      flex:          1;
+      max-width:     220px;
+      padding:       28px 24px;
+      background:    var(--card);
+      border:        1px solid var(--border);
+      text-align:    center;
+      transition:    all 0.2s ease;
+    }
+
+    .stat-card:first-child { border-radius: 16px 0 0 16px; }
+    .stat-card:last-child  { border-radius: 0 16px 16px 0; }
+    .stat-card:not(:first-child) { border-left: none; }
+
+    .stat-card:hover {
+      background: rgba(0,232,87,0.08);
+      transform:  translateY(-3px);
+      z-index: 2;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .stat-num {
+      font-family:   'Sora', sans-serif;
+      font-weight:   800;
+      font-size:     32px;
+      color:         var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color:     var(--muted);
+      font-weight: 500;
+    } */
+  </style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<!-- Navbar -->
+<nav>
+  <a href="/" class="nav-brand">
+<!--    <div class="nav-logo">⚡</div>-->
+    SplitKar
+  </a>
+  <div class="nav-links">
+    <a href="/login">Sign in</a>
+    <a href="/register" class="btn-nav">Get started free</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="hero-badge-dot"></span>
+    Built for India &nbsp;·&nbsp; INR &nbsp;·&nbsp; UPI
+  </div>
+
+  <h1 class="hero-title">
+    <span class="line1">Split expenses.</span>
+    <span class="line2">Not friendships.</span>
+  </h1>
+
+  <p class="hero-sub">
+    SplitKar is the smartest way for Indian groups to track shared expenses,
+    split bills fairly, and settle up all in one place.
+  </p>
+
+  <div class="hero-cta">
+    <a href="/register" class="btn-primary">
+      Start for free <span class="arrow">→</span>
+    </a>
+    <a href="/login" class="btn-ghost">Sign in</a>
+  </div>
+
+  <div class="hero-trust">
+    <div class="trust-item">
+      <div class="trust-icon">✓</div>
+      No credit card required
+    </div>
+    <div class="trust-divider"></div>
+    <div class="trust-item">
+      <div class="trust-icon">✓</div>
+      Free to use
+    </div>
+    <div class="trust-divider"></div>
+    <div class="trust-item">
+      <div class="trust-icon">✓</div>
+      Realtime sync
+    </div>
+  </div>
+<!-- 
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Stats 
+<div class="stats-bar">
+  <div class="stat-card">
+    <div class="stat-num">₹0</div>
+    <div class="stat-label">Cost to use</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">100%</div>
+    <div class="stat-label">Equal splits</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">∞</div>
+    <div class="stat-label">Groups & members</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">1-tap</div>
+    <div class="stat-label">Settle up</div>
+  </div>
+</div> -->
+
+</body>
+</html>

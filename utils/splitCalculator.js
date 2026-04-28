@@ -1,21 +1,11 @@
-/**
- * Calculates equal split amounts for each member
- * Returns array of { user, amount }
- */
 exports.calculateEqualSplit = (totalAmount, memberIds) => {
   const share = parseFloat((totalAmount / memberIds.length).toFixed(2));
   const splits = memberIds.map(id => ({ user: id, amount: share, settled: false }));
-  // Fix rounding: add leftover to first member
   const diff = parseFloat((totalAmount - share * memberIds.length).toFixed(2));
   if (diff !== 0) splits[0].amount = parseFloat((splits[0].amount + diff).toFixed(2));
   return splits;
 };
 
-/**
- * Simplifies debts within a group.
- * Input:  [{ from, to, amount }]
- * Output: minimized list of transactions
- */
 exports.simplifyDebts = (debts) => {
   const net = {};
   debts.forEach(({ from, to, amount }) => {

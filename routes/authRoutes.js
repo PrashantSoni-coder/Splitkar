@@ -21,7 +21,11 @@ const loginRules = [
   body('password').notEmpty().withMessage('Password is required')
 ];
 
-router.get('/',         (req, res) => res.redirect(req.session.user ? '/dashboard' : '/login'));
+// router.get('/',         (req, res) => res.redirect(req.session.user ? '/dashboard' : '/login'));
+router.get('/', (req, res) => {
+  if (req.session.user) return res.redirect('/dashboard');
+  res.render('index', { title: 'Home', layout: false });
+});
 router.get('/register', isGuest, authController.getRegister);
 router.post('/register',isGuest, authLimiter, registerRules, handleValidation, authController.postRegister);
 router.get('/login',    isGuest, authController.getLogin);

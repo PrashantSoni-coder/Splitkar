@@ -39,7 +39,6 @@ const wrapTemplate = (body) => `
 </body>
 </html>`;
 
-// Named email senders
 sendEmail.welcome = (user) => sendEmail({
   to: user.email,
   subject: 'Welcome to SplitKar!',

@@ -3,7 +3,6 @@
     <h1>Activity Feed</h1>
   </div>
 
-  <!-- Group Filter -->
   <div class="activity-filters">
     <a href="/activity" class="filter-btn <%= !activeGroup ? 'active' : '' %>">All Groups</a>
     <% userGroups.forEach(g => { %>
@@ -46,7 +45,6 @@
       <% }) %>
     </div>
 
-    <!-- Pagination -->
     <% if (totalPages > 1) { %>
       <div class="pagination">
         <% if (currentPage > 1) { %>

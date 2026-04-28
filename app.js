@@ -1,33 +1,30 @@
 require('dotenv').config();
-const express        = require('express');
-const path           = require('path');
-const morgan         = require('morgan');
-const helmet         = require('helmet');
-const compression    = require('compression');
-const session        = require('express-session');
-const MongoStore     = require('connect-mongo');
-const flash          = require('connect-flash');
+const express = require('express');
+const path = require('path');
+const morgan = require('morgan');
+const helmet = require('helmet');
+const compression = require('compression');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const flash = require('connect-flash');
 const methodOverride = require('method-override');
 const expressLayouts = require('express-ejs-layouts');
 
-const connectDB         = require('./config/db');
-const authRoutes        = require('./routes/authRoutes');
-const groupRoutes       = require('./routes/groupRoutes');
-const expenseRoutes     = require('./routes/expenseRoutes');
-const activityRoutes    = require('./routes/activityRoutes');
-const healthRoutes      = require('./routes/healthRoutes');
-const errorHandler      = require('./middleware/errorHandler');
-const notFound          = require('./middleware/notFound');
+const connectDB = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
+const groupRoutes = require('./routes/groupRoutes');
+const expenseRoutes = require('./routes/expenseRoutes');
+const activityRoutes = require('./routes/activityRoutes');
+const healthRoutes = require('./routes/healthRoutes');
+const errorHandler = require('./middleware/errorHandler');
+const notFound5 = require('./middleware/notFound');
 const { globalLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
 connectDB();
-
-// ── Trust Render's proxy (required for secure cookies + rate limiting) ──
 app.set('trust proxy', 1);
 
-// ── Security headers ──
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -42,37 +39,21 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-// ── Performance ──
 app.use(compression());
-
-// ── Health check (before rate limiter so Render can always reach it) ──
 app.use(healthRoutes);
-
-// ── Global rate limit ──
 app.use(globalLimiter);
-
-// ── Logging ──
 if (process.env.NODE_ENV !== 'production') app.use(morgan('dev'));
-
-// ── Body parsing ──
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-// ── Method override ──
 app.use(methodOverride('_method'));
-
-// ── Static files ──
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0
 }));
-
-// ── View engine ──
 app.use(expressLayouts);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('layout', 'layouts/main');
 
-// ── Session ──
 app.use(session({
   secret:            process.env.SESSION_SECRET,
   resave:            false,
@@ -87,10 +68,7 @@ app.use(session({
   name: 'sk.sid'
 }));
 
-// ── Flash ──
 app.use(flash());
-
-// ── Global locals ──
 app.use((req, res, next) => {
   res.locals.user    = req.session.user || null;
   res.locals.success = req.flash('success');
@@ -98,16 +76,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── Routes ──
 app.use('/',         authRoutes);
 app.use('/groups',   groupRoutes);
 app.use('/expenses', expenseRoutes);
 app.use('/activity', activityRoutes);
 
-// ── 404 ──
 app.use(notFound);
-
-// ── Error handler ──
 app.use(errorHandler);
 
 module.exports = app;
